@@ -1,0 +1,117 @@
+# a class to read files of different extensions with ObjectFactory.
+
+import os
+import sys
+import glob
+import importlib
+import inspect
+import logging
+import traceback
+import numpy as np
+
+from abc import ABCMeta, abstractmethod
+from collections import OrderedDict
+
+class ObjectFactory:
+    """A factory for creating objects based on their class name.
+    """
+    def __init__(self):
+        self._classes = {}
+
+    def register_class(self, target_class):
+        """Register a class.
+        """
+        self._classes[target_class.__name__] = target_class
+
+    def create_object(self, class_name, *args, **kwargs):
+        """Create an object based on its class name.
+        """
+        target_class = self._classes.get(class_name)
+        if not target_class:
+            raise ValueError('Class {} not found.'.format(class_name))
+        return target_class(*args, **kwargs)
+
+class File(metaclass=ABCMeta):
+
+    @abstractmethod
+    def read(self, filename):
+        pass
+
+    @abstractmethod
+    def write(self, filename):
+        pass
+
+
+class TextFile(File):
+
+    def read(self, filename):
+        with open(filename, 'r') as f:
+            return f.read()
+
+    def write(self, filename):
+        with open(filename, 'w') as f:
+            f.write(self.text)
+
+class NumpyFile(File):
+    
+        def read(self, filename):
+            return np.load(filename)
+    
+        def write(self, filename):
+            np.save(filename, self.data)
+
+class HDF5File(File):
+
+    def read(self, filename):
+        import h5py
+        with h5py.File(filename, 'r') as f:
+            return f['data'][()]
+
+    def write(self, filename):
+        import h5py
+        with h5py.File(filename, 'w') as f:
+            f['data'] = self.data
+
+class ImageFile(File):
+
+    def read(self, filename):
+        from PIL import Image
+        return Image.open(filename)
+
+    def write(self, filename):
+        self.image.save(filename)
+
+class ObjectFile(File):
+
+    def read(self, filename):
+        import pickle
+        with open(filename, 'rb') as f:
+            return pickle.load(f)
+
+    def write(self, filename):
+        import pickle
+        with open(filename, 'wb') as f:
+            pickle.dump(self.obj, f)
+
+class FileFactory(ObjectFactory):
+
+    def __init__(self):
+        super().__init__()
+        self.register_class(TextFile)
+        self.register_class(NumpyFile)
+        self.register_class(HDF5File)
+        self.register_class(ImageFile)
+        self.register_class(ObjectFile)
+
+
+def main():
+    file_factory = FileFactory()
+    for filename in glob.glob('*.py'):
+        file = file_factory.create_object('TextFile')
+        file.read(filename)
+        file.write(filename + '.bak')
+
+if __name__ == '__main__':
+    main()
+    
+
