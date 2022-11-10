@@ -78,4 +78,13 @@ class FilterChain:
             text = filter.apply(text)
         return text
 
- 
+if __name__ == "__main__":
+
+    filter_chain = FilterChain()
+    filter_chain.add_filter(Lowercase())
+    filter_chain.add_filter(Space())
+    filter_chain.add_filter(Reverse())
+    filter_chain.add_filter(Capitalize())
+    filter_chain.add_filter(Uppercase())
+
+    print(filter_chain.apply("Hello world!")) 
