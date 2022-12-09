@@ -4,13 +4,13 @@ from pandas import read_csv, read_excel
 
 class Strategy:
 
-    def read_file(self, path):
+    def read_file(self, path: str, file_type: str) -> object:
         pass
 
 
 # ConcreteStrategy
 class CsvStrategy(Strategy):
-    def read_file(self, path):
+    def read_file(self, path: str, file_type: str) -> object:
         return read_csv(path)
 
 
@@ -26,14 +26,13 @@ class File:
     def __init__(self):
         self.strategy = object
 
-    def execute(self, path):
+    def execute(self, path: str, file_type: str) -> object:
         if not isinstance(self.strategy, Strategy):
             return None
         return self.strategy.read_file(path)
 
-    def set_strategy(self, strategy):
+    def set_strategy(self, strategy: Strategy):
         self.strategy = strategy
-
 
     reader = File()
     path = '/Users/ruddirodriguez/Documents/ML/test_dvc/Data/Vendor_Data.csv'

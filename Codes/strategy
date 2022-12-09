@@ -1,0 +1,36 @@
+# Strategy design pattern to open files in any format.
+
+from abc import ABC, abstractmethod
+
+
+class Strategy(ABC):
+    @abstractmethod
+    def do_operation(self, a, b):
+        pass
+
+
+# ConcreteStrategy
+class AddStrategy(Strategy):
+    def do_operation(self, a, b):
+        return a + b
+
+
+# ConcreteStrategy
+class SubtractStrategy(Strategy):
+    def do_operation(self, a, b):
+        return a - b
+
+
+# Context
+class Calc:
+    def __init__(self):
+        self.strategy = object
+
+    def execute(self, a, b):
+        if not isinstance(self.strategy, Strategy):
+            return 0
+        return self.strategy.do_operation(a, b)
+
+    def set_strategy(self, strategy):
+        self.strategy = strategy
+

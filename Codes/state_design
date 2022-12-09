@@ -1,0 +1,160 @@
+# state design pattern to open and close a file.
+
+import abc
+
+class FileState(metaclass=abc.ABCMeta
+):
+    @abc.abstractmethod
+    def open(self):
+        pass
+
+    @abc.abstractmethod
+    def close(self):
+        pass
+
+class OpenState(FileState):
+    def open(self):
+        print("File is already open")
+
+    def close(self):
+        print("Closing file")
+        return ClosedState()
+
+class ClosedState(FileState):
+    def open(self):
+        print("Opening file")
+        return OpenState()
+
+    def close(self):
+        print("File is already closed")
+
+class File:
+    def __init__(self):
+        self.state = ClosedState()
+
+    def open(self):
+        self.state = self.state.open()
+
+    def close(self):
+        self.state = self.state.close()
+
+if __name__ == '__main__':
+    file = File()
+    file.open()
+    file.close()
+    file.close()
+    file.open()
+    file.open()
+
+# Output:
+# Opening file
+# Closing file
+# File is already closed
+# Opening file
+# File is already open
+
+# Strategy design pattern to open and close a file.
+
+import abc
+
+class FileStrategy(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def open(self):
+        pass
+
+    @abc.abstractmethod
+    def close(self):
+        pass
+
+class OpenStrategy(FileStrategy):
+    def open(self):
+        print("Opening file")
+
+    def close(self):
+        print("Closing file")
+
+class ClosedStrategy(FileStrategy):
+    def open(self):
+        print("Opening file")
+
+    def close(self):
+        print("Closing file")
+
+class File:
+    def __init__(self, strategy):
+        self.strategy = strategy
+
+    def open(self):
+        self.strategy.open()
+
+    def close(self):
+        self.strategy.close()
+
+if __name__ == '__main__':
+
+    file = File(ClosedStrategy())
+    file.open()
+    file.close()
+    file.close()
+    file.open()
+    file.open()
+
+# Output:
+# Opening file
+# Closing file
+# Closing file
+# Opening file
+# Opening file
+
+# Command design pattern to open and close a file.
+
+import abc
+# Invoker
+class File:
+    def __init__(self):
+        self.command = None
+
+    def set_command(self, command):
+        self.command = command
+
+    def execute(self):
+        self.command.execute()
+
+
+# Receiver
+class FileCommand(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def execute(self):
+        pass
+# ConcreteCommand
+class OpenCommand(FileCommand):
+    def execute(self):
+        print("Opening file")
+        
+# ConcreteCommand
+class CloseCommand(FileCommand):
+    def execute(self):
+        print("Closing file")
+
+
+
+if __name__ == '__main__':
+    file = File()
+    file.set_command(OpenCommand())
+    file.execute()
+    file.set_command(CloseCommand())
+    file.execute()
+    file.execute()
+    file.set_command(OpenCommand())
+    file.execute()
+    file.set_command(OpenCommand())
+    file.execute()
+
+# Output:
+
+# Opening file
+# Closing file
+# Closing file
+# Opening file
+# Opening file
+

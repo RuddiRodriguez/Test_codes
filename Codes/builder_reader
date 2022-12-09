@@ -1,0 +1,83 @@
+# a class to read files of different extensions using buider pattern.
+
+import os
+import sys
+import glob
+import importlib
+import inspect
+import logging
+import traceback
+import numpy as np
+
+from abc import ABCMeta, abstractmethod
+from collections import OrderedDict
+
+class ObjectFactory:
+    """A factory for creating objects based on their class name.
+    """
+    def __init__(self):
+        self._classes = {}
+
+    def register_class(self, target_class):
+        """Register a class.
+        """
+        self._classes[target_class.__name__] = target_class
+
+    def create_object(self, class_name, *args, **kwargs):
+        """Create an object based on its class name.
+        """
+        target_class = self._classes.get(class_name)
+        if not target_class:
+            raise ValueError('Class {} not found.'.format(class_name))
+        return target_class(*args, **kwargs)
+
+class File(metaclass=ABCMeta):
+    
+        @abstractmethod
+        def read(self, filename):
+            pass
+    
+        @abstractmethod
+        def write(self, filename):
+            pass
+            
+class TextFile(File):
+
+    def read(self, filename):
+        with open(filename, 'r') as f:
+            return f.read()
+
+    def write(self, filename):
+        with open(filename, 'w') as f:
+            f.write(self.text)
+
+class NumpyFile(File):
+        
+            def read(self, filename):
+                return np.load(filename)
+        
+            def write(self, filename):
+                np.save(filename, self.data)
+
+class FileBuilder:
+
+    def __init__(self):
+        self._factory = ObjectFactory()
+        self._factory.register_class(TextFile)
+        self._factory.register_class(NumpyFile)
+
+    def build(self, filename):
+        _, ext = os.path.splitext(filename)
+        ext = ext[1:]
+        return self._factory.create_object(ext)
+
+if __name__ == "__main__":
+
+    builder = FileBuilder()
+    file = builder.build("test.txt")
+    print(file.read("test.txt"))
+
+    file = builder.build("test.npy")
+    print(file.read("test.npy"))
+
+    
